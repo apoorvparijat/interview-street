@@ -5,23 +5,22 @@ class City
 
 	def initialize 
 		@cityNo = @@cityCount
-		@connection = Array.new
 		@@cityCount = @@cityCount+1 
 		@visited = 0
+		$maps[@cityNo] = Array.new
 	end
 
 
 	def addRoad (cityNo)
-		@connection[cityNo] = true if cityNo.class == Fixnum
-		@connection[cityNo.cityNo] = true if cityNo.class == City
-	end
-
-	def showRoads
-		print @connection.join(",") + "\n"
+		$maps[@cityNo] << cityNo if cityNo.class == Fixnum
+		$maps[@cityNo] << cityNo.cityNo if cityNo.class == City
 	end
 
 	def isConnectedTo id
-		return @connection[id]
+		$maps[@cityNo].each{|x|
+			return true if x == id
+		}
+		false
 	end
 	
 	def self.connectCities(c1,c2)
@@ -30,11 +29,11 @@ class City
 	end
 	
 	def getRoads
-		@connection
+		return $maps[@cityNo]
 	end
 end
 
-
+$maps = Array.new
 numCity,numRoad = gets.split(" ")
 city = Array.new(numCity.to_i)
 1.upto(numCity.to_i) { |x| city[x-1] = City.new} 
@@ -54,19 +53,17 @@ def dfs(kingdom,cn,numCity,queue)
 	c = kingdom[cn]
 		arr = c.getRoads
 		ctr = 0
-		arr.each {|x|
-			unless (x == nil)
-				#print ctr.to_s + " -> "
-				unless queue[ctr] 
-					#puts "\n ctr is ", ctr
-					dfs(kingdom,ctr,numCity,queue)
-					queue[ctr] = false
-				else
+		arr.each {|ctr|
+			#print ctr.to_s + " -> "
+			unless queue[ctr] 
+				#puts "\n ctr is ", ctr
+				dfs(kingdom,ctr,numCity,queue)
+				queue[ctr] = false
+			else
 					#puts "############ unsetting paths ################"
-					$paths = -1
-				end
-				#puts "\n# deadend with starting point #{cn} and route #{cn} -> #{ctr}."
+				$paths = -1
 			end
+				#puts "\n# deadend with starting point #{cn} and route #{cn} -> #{ctr}."
 			ctr += 1
 		} 
 	if(cn == numCity-1 && $paths >= 0)
